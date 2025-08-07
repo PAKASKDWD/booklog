@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/booklog
+    username: booklog_user
+    password: booklog_password
+    driver-class-name: org.mariadb.jdbc.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+        format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+jwt:
+  secret: your-jwt-secret-key-here-make-it-very-long-and-secure-for-production
+  expiration: 86400000 # 24 hours
+
+file:
+  upload-dir: ./uploads/covers
+
+logging:
+  level:
+    com.booklog: DEBUG
+    org.springframework.security: DEBUG

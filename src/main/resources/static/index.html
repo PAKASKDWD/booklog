@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booklog - 나만의 독서 기록장</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header" id="header" style="display: none;">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📚</span>
+                    <h1>Booklog</h1>
+                </div>
+                <div class="user-info">
+                    <span id="userNickname"></span>
+                    <button onclick="logout()" class="btn-logout">로그아웃</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 로그인 폼 -->
+    <div class="auth-container" id="loginForm">
+        <div class="auth-card">
+            <div class="auth-header">
+                <span class="logo-icon">📚</span>
+                <h1>Booklog</h1>
+                <p>당신만의 독서 기록장</p>
+            </div>
+            
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>이메일</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">로그인</button>
+            </form>
+            
+            <div class="auth-footer">
+                <span>계정이 없으신가요? </span>
+                <a href="#" onclick="showRegister()">회원가입</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 회원가입 폼 -->
+    <div class="auth-container" id="registerForm" style="display: none;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <span class="logo-icon">📚</span>
+                <h1>회원가입</h1>
+            </div>
+            
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>이메일</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="registerPassword" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label>닉네임</label>
+                    <input type="text" id="registerNickname" required>
+                </div>
+                <button type="submit" class="btn-primary">회원가입</button>
+            </form>
+            
+            <div class="auth-footer">
+                <span>이미 계정이 있으신가요? </span>
+                <a href="#" onclick="showLogin()">로그인</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main-content" id="mainContent" style="display: none;">
+        <div class="container">
+            <!-- 컨트롤 바 -->
+            <div class="controls">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="책 제목 또는 저자로 검색...">
+                </div>
+                <select id="sortSelect" onchange="loadBooks()">
+                    <option value="date">최신 등록순</option>
+                    <option value="title">제목순</option>
+                    <option value="author">저자순</option>
+                </select>
+                <button onclick="showAddForm()" class="btn-add">
+                    ➕ 책 등록
+                </button>
+            </div>
+
+            <!-- 책 그리드 -->
+            <div class="books-grid" id="booksGrid">
+                <!-- 책 카드들이 동적으로 추가됩니다 -->
+            </div>
+
+            <!-- 빈 상태 -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <span class="empty-icon">📚</span>
+                <h3>등록된 책이 없습니다</h3>
+                <p>첫 번째 독서 기록을 시작해보세요!</p>
+                <button onclick="showAddForm()" class="btn-primary">책 등록하기</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 책 등록/수정 모달 -->
+    <div class="modal" id="bookModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">새 책 등록</h2>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <form id="bookForm" onsubmit="handleBookSubmit(event)">
+                <div class="form-section">
+                    <h3>책 정보</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>책 제목 *</label>
+                            <input type="text" id="bookTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label>저자 *</label>
+                            <input type="text" id="bookAuthor" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>출판사</label>
+                            <input type="text" id="bookPublisher">
+                        </div>
+                        <div class="form-group">
+                            <label>읽은 날짜</label>
+                            <input type="date" id="bookReadDate">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>책 표지</label>
+                        <input type="file" id="bookCover" accept="image/*">
+                        <div id="coverPreview"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>책 소개</label>
+                        <textarea id="bookDescription" rows="3" placeholder="책에 대한 간단한 소개를 입력해주세요..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>독후감</h3>
+                    <div class="form-group">
+                        <label>독서 전 생각</label>
+                        <textarea id="bookBeforeThoughts" rows="4" placeholder="이 책을 읽기 전에 어떤 기대나 생각이 있었나요?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>독후감 본문</label>
+                        <textarea id="bookReview" rows="6" placeholder="책을 읽고 느낀 점, 인상깊었던 부분, 생각해볼 점 등을 자유롭게 작성해주세요..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>독서 후 느낀 점</label>
+                        <textarea id="bookAfterThoughts" rows="4" placeholder="책을 다 읽은 후 전체적인 소감이나 변화된 생각이 있다면 적어주세요..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="bookIsPublic" checked>
+                            <span>다른 사용자에게 공개</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal()" class="btn-secondary">취소</button>
+                    <button type="submit" class="btn-primary" id="submitBtn">등록하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 책 상세보기 모달 -->
+    <div class="modal" id="detailModal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <button onclick="closeDetailModal()" class="btn-back">← 목록으로</button>
+                <div class="detail-actions">
+                    <button onclick="editBook()" class="btn-edit">✏️ 수정</button>
+                    <button onclick="deleteBook()" class="btn-delete">🗑️ 삭제</button>
+                </div>
+            </div>
+            
+            <div class="book-detail" id="bookDetailContent">
+                <!-- 책 상세 내용이 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
